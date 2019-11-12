@@ -1,28 +1,37 @@
 # Example specification file
 
+[DEFAULT]
+tags = [
+  ["ili ", "li "],
+  ["ili2 ", "li2 "],
+  ["ib", "b"],
+  ["\\\\ip ", "\\\\p "],
+  ["\\\\ipr ", "\\\\pr "]
+  ]
+
 [config]
 ptpath = C:\My Paratext 9 Projects\MP1
-outputpath = C:\Paratext_text_selector_output\MP1
-projectname = MP1
+outputpath = "C:\Paratext_text_selector_output\MP1"
+projectname = "MP1"
 
 [LUK]
 
 [PSA]
-chapters 1-5,23,45-52,129
+chapters = 1-5,23,45-52,129
 
 [*A0FRTMP1bt.SFM]
 chapters = 2
 nointro = true
 removeChapterLines = true
-Path = C:\My Paratext 9 Projects\MP1bt
-ConvertIntroTags = true
+Path = .
+ConvertTags = %(tags)s
 
 [*A0FRTMP1bt.SFM$1]
 chapters = 0
 removeChapterLines = true
 Path = C:\My Paratext 9 Projects\MP1bt
 Output = Prakata.SFM
-ConvertIntroTags = true
+ConvertTags = [["ili ", "li "], ["ili2 ", "li2 "]]
 
 [*A9GLOMP1.SFM]
 Output = temp_glo.SFM

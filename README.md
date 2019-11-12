@@ -122,11 +122,64 @@ If you're unsure what the filename is look in the project direction found under 
 
 # Other commands
 
-* `ConvertIntroTags = true` makes the following replacements:
-  * \ili -> \li
-  * \ili2 -> \li2
-  * \ip -> \p
-  * \ipr -> \pr
-  * \ib -> \b
-* `RemoveChapterLines = true` removes `\c ` tags and their number from the output file. Sometimes useful when copying front/back matter to separate files that don't need chapters.
-* `RemoveDraftGloEntries = true` removes any glossary entry that contains the string `zzz`. It's a convention that our team used to specify which GLO entries were still in progress. So `\k John - zzz: \k*: Stuff about John` would not appear in the GLO file output if the command is used. Note it is possible to use this to remove any line containing `zzz` from any file. Not sure why you'd want to though.
+## `ConvertTags`
+
+WARNING! this is one of the most difficult features to use correctly because the syntax of the list has to be exactly has follows. The list needs to be wrapped in `[ ]` and each substitution does as well. Each pair to be substituted needs to be wrapped in *double* quotes.  It doesn't matter if you prefix the backslash or not. If you do it *must* be `\\\\` (yes, four backslashes).
+
+It is recommended to add a trailing space after the tag to be replaced, *unless that tag is the only thing on a line*.
+
+If the list is spread over multiple lines, subsequent lines *must* be indented.
+
+```
+ConvertTags = [
+  ["to replace ", "replacement "],
+  ["to replace 2 ", "replacement 2 "]
+  ]
+```
+
+This would also be a valid format:
+
+```
+ConvertTags = [["to replace ", "replacement "], ["to replace 2 ", "replacement 2 "]]
+
+```
+
+Here is an example. The last two lines have the backslash, the first three don't. The tool doesn't care and both will work. `ib` is the only thing on the line in which it occurs so there is no trailing space after it. If there was, then it would not be replaced.
+
+```
+ConvertTags = [
+  ["ili ", "li "],
+  ["ili2 ", "li2 "],
+  ["ib", "b"],
+  ["\\\\ip ", "\\\\p "],
+  ["\\\\ipr ", "\\\\pr "]
+  ]
+```
+Long story short, if you choose to use this, make sure the syntax is correct and double check the output before you build an app with it.
+
+If you need to change the same set of tags in multiple books you can add a `[DEFAULT]` section with and assign the list to a variable name which can be referenced in the ConvertTags Command as `%(varialbe-name)s`. See the snippet below:
+
+```
+[DEFAULT]
+tags = [
+  ["ili ", "li "],
+  ["ili2 ", "li2 "],
+  ["ib", "b"],
+  ["\\\\ip ", "\\\\p "],
+  ["\\\\ipr ", "\\\\pr "]
+  ]
+
+...
+
+[GLO]
+ConvertTags = %(tags)s
+```
+
+## `RemoveDraftGloEntries = <marker>`
+
+This removes any glossary entry that contains the string found in `<marker>`. For example if you had `RemoveDraftGloEntries = zzz` in your specification file, then `\k John - zzz: \k*: Stuff about John` would not appear in the GLO file output if the command is used. It allows you to use keep drafts in Paratext without having to manually remove them from the SFM files before publishing.
+
+
+## `RemoveChapterLines = true`
+
+This removes `\c ` tags and their number from the output file. Sometimes useful when copying front/back matter to separate files that don't need chapters.

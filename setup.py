@@ -8,7 +8,7 @@ f.close()
 
 setup(
     name="paratext-text-selector",
-    version="0.2",
+    version="0.3.3",
     description="Python tool for selecting books and portions of books created with Paratext",
     url="",
     long_description= long_desc,

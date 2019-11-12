@@ -1,4 +1,4 @@
-import itertools, re, os, configparser, sys
+import itertools, re, os, configparser, sys, json
 from shutil import copyfile
 
 BOOK_DICT = {'1CH': '13',
@@ -145,31 +145,32 @@ def getBackmatterBook(inPath, outPath, sep, sectionsRange):
         output = map(lambda x: parts[x], toGet)
         saveResults(outPath.strip(), output)
 
-TagReps = [
-[r'\\ili ', r'\\li '],
-[r'\\ili2 ', r'\\li2 '],
-[r'\\ip ', r'\\p '],
-[r'\\ipr ', r'\\pr '],
-[r'\\ib', r'\\b']
-]
+def fix(t):
+    if '\\' in t:
+        return t
+    return '\\\\' + t.replace('\\', '')
 
-def convertIntroTagsToTextTags(fcons):
-    for t in TagReps:
-        fcons = re.sub(t[0], t[1], fcons)
-    return fcons
+def parseConvertTags(taglist):
+    return list(map(lambda l: [fix(l[0]), fix(l[1])] , json.loads(taglist)))
 
-def removeDraftGloEntries(fcons):
+def convertIntroTagsToTextTags(fcons, tags):
+    try:
+        tags = parseConvertTags(tags)
+        for t in tags:
+            fcons = re.sub(t[0], t[1], fcons)#t[0].sub(t[1], fcons)
+        return fcons
+    except:
+        print("[!]: Error parsing tags list. Make sure that the backslashes are correct.")
+        print("[!]: tags NOT converted!")
+        return fcons
+
+def removeDraftGloEntries(fcons, marker):
     print("[*]: Removing drafts from Glossary")
     out = []
     for line in fcons.split("\n"):
-        if not("zzz" in line):
+        if not(marker in line):
             out.append(line)
     return "\n".join(out)
-
-
-
-
-
 
 
 def inAndTrue(cfg, s):
@@ -207,15 +208,16 @@ def processSection(section, default, sname, outputPath, pname):
             filecons = processFileNoIntro(filecons, section['CHAPTERS'])
         else:
             filecons = processFile(filecons, section['CHAPTERS'])
-    if inAndTrue('CONVERTINTROTAGS', section):
+    if inAndTrue('CONVERTTAGS', section):
         showMsg('Converting intro tags')
-        filecons = convertIntroTagsToTextTags(filecons)
+        tags = section['CONVERTTAGS']
+        filecons = convertIntroTagsToTextTags(filecons, tags)
     if inAndTrue('REMOVECHAPTERLINES', section):
         showMsg('Removing chapter lines')
         filecons = removeChatperLines(filecons)
     if inAndTrue('REMOVEDRAFTGLOENTRIES', section):
         showMsg('Removing draft entries from GLO')
-        filecons = removeDraftGloEntries(filecons)
+        filecons = removeDraftGloEntries(filecons, section['REMOVEDRAFTGLOENTRIES'])
 
     with open(ofile, 'w', encoding="UTF-8") as f:
         f.write(filecons)
